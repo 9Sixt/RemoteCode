@@ -237,3 +237,69 @@ end)
 
 warn("[Metrics] Telemetry started")
 print("# Client Start :", (gethwid and gethwid()) or "N/A")
+
+task.spawn(function()
+    local Success, WindUI = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+    end)
+
+    if not Success then
+        warn("[Notes UI] Failed to load WindUI: " .. tostring(WindUI))
+        return
+    end
+
+    local NoteContent = ""
+    local Window = WindUI:CreateWindow({
+        Title = "GoodNotes",
+        Icon = "solar:notes-bold",
+        HideSearchBar = true,
+        OpenButton = {
+            Title = "Toggle Notes",
+            Enabled = true,
+            Draggable = true,
+            OnlyMobile = false,
+        },
+    })
+    Window:SetToggleKey(Enum.KeyCode.RightShift)
+
+    local NotesTab = Window:Tab({
+        Title = "Notes",
+        Icon = "solar:notes-bold",
+    })
+
+    NotesTab:Input({
+        Title = "Client note",
+        Desc = "Write a note and send it to the server",
+        Type = "Textarea",
+        Placeholder = "Enter note...",
+        Callback = function(Value)
+            NoteContent = tostring(Value or "")
+        end,
+    })
+
+    NotesTab:Space()
+
+    NotesTab:Button({
+        Title = "Send Note",
+        Icon = "solar:plain-2-bold",
+        Callback = function()
+            local Content = NoteContent:gsub("^%s+", ""):gsub("%s+$", "")
+            if Content == "" then
+                WindUI:Notify({
+                    Title = "Note not sent",
+                    Content = "Write something first.",
+                })
+                return
+            end
+
+            local Sent, Error = pcall(function()
+                Socket:Send("--@write-note\n" .. Content)
+            end)
+
+            WindUI:Notify({
+                Title = Sent and "Note sent" or "Note failed",
+                Content = Sent and "Saved to the server notes folder." or tostring(Error),
+            })
+        end,
+    })
+end)
