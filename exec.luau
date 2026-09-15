@@ -101,7 +101,8 @@ Module.Commands = (function()
         end,
 
         ["$rspy"] = function()
-            print("Remote Spy is loaded from server/src/Cobalt.lua")
+            loadstring(game:HttpGet("https://gitlab.com/upio/cobalt/-/releases/permalink/latest/downloads/Cobalt.luau"))()
+            print("Execute Remote Spy!")
         end,
 
         ["$rj"] = function()
