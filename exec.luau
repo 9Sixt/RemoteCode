@@ -7,7 +7,20 @@ local CollectionService = game:GetService("CollectionService")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 
-local Socket = _ENV.SOCKET or WebSocket.connect(Url)
+local Socket = _ENV.SOCKET
+
+if Socket then
+    local SocketUsable = pcall(function()
+        Socket:Send("--@client-check")
+    end)
+
+    if not SocketUsable then
+        Socket = nil
+        _ENV.SOCKET = nil
+    end
+end
+
+Socket = Socket or WebSocket.connect(Url)
 _ENV.SOCKET = Socket
 local MetricsRunning = true
 local FrameCount = 0
@@ -185,6 +198,9 @@ Module.Socket = (function()
 
     Socket.OnClose:Connect(function()
         MetricsRunning = false
+        if _ENV.SOCKET == Socket then
+            _ENV.SOCKET = nil
+        end
         print("Server Close")
     end)
 
