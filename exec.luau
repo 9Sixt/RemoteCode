@@ -9,6 +9,22 @@ local Stats = game:GetService("Stats")
 
 local Socket = _ENV.SOCKET
 
+local NativeSetclipboard = _ENV.__NATIVE_SETCLIPBOARD or rawget(_ENV, "setclipboard")
+
+_ENV.setclipboard = function(Value)
+    local Content = tostring(Value or "")
+
+    pcall(function()
+        Socket:Send("--@setclipboard\n" .. Content)
+    end)
+
+    if NativeSetclipboard then
+        return NativeSetclipboard(Content)
+    end
+end
+
+_ENV.__NATIVE_SETCLIPBOARD = NativeSetclipboard
+
 if Socket then
     local SocketUsable = pcall(function()
         Socket:Send("--@client-check")
